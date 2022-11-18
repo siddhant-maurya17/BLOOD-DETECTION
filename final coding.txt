@@ -1,0 +1,150 @@
+input=imread('Im096_0.jpg');
+% figure,
+% imshow(input)
+% title('original image');
+% imhist(input)
+% figure(2)
+gi=rgb2gray(input);
+% figure(3)
+% imshow(gi)
+% figure(4)
+a=1;
+b=40;
+c=a*double(gi)+b;
+c=uint8(c);
+% figure(5)
+% imshow(c)
+% figure(6)
+% imhist(c)
+h=histeq(gi);
+% figure(7)
+% imshow(h)
+% figure(8)
+% imhist(h)
+L1=imadd(c,h);
+% figure(9)
+% imshow(L1)
+L2=imsubtract(c,h);
+% figure(10)
+% imshow(L2)
+L3=imadd(L1,L2);
+% figure(11)
+% imshow(L3)
+LH=imhist(L3);
+% figure(12)
+% imhist(L3)
+l=graythresh(L3);
+bw = imbinarize(L3,l);
+% figure,
+% imshow(bw);
+BW= bwareaopen(bw,100);
+BW0=imclearborder(BW);
+ se = strel('disk',3);
+ BW=imclose(BW,se);
+%  figure,
+%  imshow(BW);
+%  title('removal of small particles');
+BW1 = edge(BW,'sobel');
+% figure,
+% imshow(BW1)
+% title('edge detection by sobel operator');
+d=im2bw(BW1);
+% figure,imshow(d),title('Original image in black and white')
+e=imfill(d,'holes');
+% figure,imshow(e),title('Filled image in black and white')
+f=bwlabel(e);
+% vislabels(f),title('Each object labelled');
+S4 = regionprops(f,'MinorAxisLength','MajorAxisLength','Area','Perimeter','centroid');
+for cnt = 1:length(S4)
+score1(cnt) = abs(1-(S4(cnt).MajorAxisLength-S4(cnt).MinorAxisLength)...
+/max([S4(cnt).MajorAxisLength,S4(cnt).MinorAxisLength]));
+score2(cnt) = abs(1 - abs(pi*((mean([S4(cnt).MajorAxisLength,...
+S4(cnt).MinorAxisLength]))/2)^2-S4(cnt).Area)/S4(cnt).Area);
+score3(cnt) = abs(1 - abs(pi*(max([S4(cnt).MajorAxisLength,...
+S4(cnt).MinorAxisLength]))-S4(cnt).Perimeter)/S4(cnt).Perimeter);
+end
+score = mean([score1;score2;score3]);
+for cnt = 1:length(S4)
+text(S4(cnt).Centroid(1),S4(cnt).Centroid(2),num2str(score(cnt)),'color','red');
+end
+A=[S4.Area];
+mean(A)
+var(A)
+radius=(sqrt(A/pi));
+myelocytes=0;
+metamylocytes=0;
+esinophils=0;
+ promyclocytes=0;
+Basophils=0;
+monocytes=0;
+ Neutrophils=0;
+  lymocytes=0;
+sum=1;
+for i = 1: length(score)
+   if(score(i)>=0.22 && score(i)<= 0.33)
+       myelocytes=myelocytes+sum
+   end
+   if(score(i)>=0.34 && score(i)<= 0.39)
+       metamylocytes= metamylocytes+sum;
+   end
+   if(score(i)>=0.40 && score(i)<= 0.49)
+       esinophils= esinophils+sum
+   end
+   if(score(i)>=0.50 && score(i)<= 0.56)
+       promyclocytes= promyclocytes+sum;
+   end
+    if(score(i)>=0.57 && score(i)<= 0.60)
+       Basophils= Basophils+sum
+    end
+   if(score(i)>=0.60 && score(i)<= 0.68)
+       monocytes= monocytes+sum;
+   end
+   if(score(i)>=0.69 && score(i)<= 0.75)
+       Neutrophils=Neutrophils+sum;
+   end
+   if(score(i)>=0.81 && score(i)<= 0.95)
+       lymocytes=lymocytes+sum;
+   end
+end
+disp("total Neutrophils is=" + Neutrophils)
+disp("total lymocytes is=" + lymocytes )
+disp("total monocytes is=" + monocytes)
+disp("total Basophils is=" + Basophils)
+disp(" total esinophils is=" + esinophils)
+ %disp('Milocytes Band are:'+ myelocytes)
+%  disp('meta mylocytes band are:'+ metamylocytes)
+%  disp('esinophils Band are:'+ esinophils)
+%  disp('promyclocytes Band are:'+ promyclocytes)
+%  disp('basophils Band are:'+ Basophils)
+%  disp('monocytes Band are:' + monocytes)
+%  disp('Neutrophils Band are:' + Neutrophils)
+%  disp('lymocytes Band are:' + lymocytes)
+% v=length(score)
+% r=(lymocytes/v)*100
+% o=(Neutrophils/v)*100
+% %z=(myelocytes/v)*100;
+% %x=(metamylocytes/v)*100;
+% q=(esinophils/v)*100
+% %w=(promyclocytes/v)*100;
+% y=(Basophils/v)*100
+% u=(monocytes/v)*100
+% % if(  r>=40)
+% %     disp('acute lymphocytes  leukemia cancer')
+% % else if(o>=41 && o<=60)
+% %         disp('acute neutrophile leukemia cancer')
+% %     else if (q>=1 && q<=4)
+%          disp(' cancer')
+%         else if (y>=0.5 && y<=1)
+%                 disp (' ycancer')
+%             else if (u>=2 &&u<=8)  
+%                     disp('ucancer')
+%                 else
+%                    disp('normal')
+%     end
+%             end
+%         end 
+%   end
+%  end
+% 
+% 
+% 
